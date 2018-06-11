@@ -1,20 +1,27 @@
+module Test.Sodium
+
+
 import Crypto.Sodium
+
 
 key : IO Key
 key = do k <- newSymmKey
          setKeyChars k 0 [1..26]
-         return k
+         pure k
    where setKeyChars : Key -> Int -> List Int -> IO ()
-         setKeyChars k i [] = return ()
+         setKeyChars k i [] = pure ()
          setKeyChars k i (c :: cs) = do setKeyIdx k i ((c * 42) `mod` 255)
                                         setKeyChars k (i + 1) cs
+
 
 nonce : IO Nonce
 nonce = newNonceFromString "sdlfkjsdlkfjacvbnm,vbnmvhghjvbnasdasdm"
 
-main : IO ()
-main = do -- first, symmetric key hello world
-          
+
+export
+test : IO ()
+test = do -- first, symmetric key hello world
+
           encrypted <- cryptoSecretBox "Hello world!" !nonce !key
           print (getBytes encrypted)
           decrypted <- cryptoSecretBoxOpen encrypted !nonce !key
@@ -30,7 +37,6 @@ main = do -- first, symmetric key hello world
           print (getBytes encrypted)
           decrypted <- cryptoBoxOpen encrypted !nonce bob_pub alice_sec
 
-          if (validOpenBox decrypted) then putStrLn (readBox decrypted)
-             else putStrLn "Error"
-
-
+          if (validOpenBox decrypted)
+          then putStrLn (readBox decrypted)
+          else putStrLn "Error"

@@ -30,15 +30,15 @@ typedef struct {
     int padding;
 } Decrypted;
 
-int box_publicKeyLength();
-int box_secretKeyLength();
-int box_nonceLength();
-int secretbox_keyLength();
-int secretbox_nonceLength();
+int box_publicKeyLength(void);
+int box_secretKeyLength(void);
+int box_nonceLength(void);
+int secretbox_keyLength(void);
+int secretbox_nonceLength(void);
 
 // Invent a new public/private key pair
 // Caller responsible for freeing
-KeyPair* newKeyPair();
+KeyPair* newKeyPair(void);
 
 // Return individual components
 Key *getPublic(KeyPair* k);

@@ -1,27 +1,30 @@
 #include "sodium_glue.h"
+
 #include <idris_rts.h>
 
-int secretbox_keyLength() {
+#include <string.h>
+
+int secretbox_keyLength(void) {
     return crypto_secretbox_KEYBYTES;
 }
 
-int secretbox_nonceLength() {
+int secretbox_nonceLength(void) {
     return crypto_secretbox_NONCEBYTES;
 }
 
-int box_publicKeyLength() {
+int box_publicKeyLength(void) {
     return crypto_box_PUBLICKEYBYTES;
 }
 
-int box_secretKeyLength() {
+int box_secretKeyLength(void) {
     return crypto_box_SECRETKEYBYTES;
 }
 
-int box_nonceLength() {
+int box_nonceLength(void) {
     return crypto_box_NONCEBYTES;
 }
 
-KeyPair* newKeyPair() {
+KeyPair* newKeyPair(void) {
     Key* pub = mkKey(box_publicKeyLength());
     Key* secret = mkKey(box_secretKeyLength());
 
@@ -101,14 +104,14 @@ Encrypted* do_crypto_secretbox(char* m, Nonce* n, Key* key) {
 
     Encrypted* e = malloc(sizeof(Encrypted) + mlen + 1);
 
-    char* inmsg = malloc(mlen + 1); 
+    char* inmsg = malloc(mlen + 1);
     char* res = (char*)e + sizeof(Encrypted);
 
     memset(inmsg, 0, crypto_secretbox_ZEROBYTES);
     strcpy(inmsg + crypto_secretbox_ZEROBYTES, m);
 
-    int r = crypto_secretbox((unsigned char*)res, (unsigned char*)inmsg, mlen, 
-                     n->nonce, (unsigned char*)key->key);
+    int r = crypto_secretbox((unsigned char*)res, (unsigned char*)inmsg, mlen,
+                             n->nonce, (unsigned char*)key->key);
 
     if (r == 0) {
         e->msg = res;
@@ -129,9 +132,8 @@ Decrypted* do_crypto_secretbox_open(Encrypted* cin, Nonce* n, Key* key) {
 
     memset(cin->msg, 0, crypto_secretbox_BOXZEROBYTES);
 
-    int r = crypto_secretbox_open(
-                         (unsigned char*)res, (unsigned char*)cin->msg, mlen, 
-                         n->nonce, (unsigned char*)key->key);
+    int r = crypto_secretbox_open((unsigned char*)res, (unsigned char*)cin->msg, mlen,
+                                  n->nonce, (unsigned char*)key->key);
 
     if (r == 0) {
         d->msg = res;
@@ -149,15 +151,15 @@ Encrypted* do_crypto_box(char* m, Nonce* n, Key* pkey, Key* skey) {
 
     Encrypted* e = malloc(sizeof(Encrypted) + mlen+1);
 
-    char* inmsg = malloc(mlen + 1); 
+    char* inmsg = malloc(mlen + 1);
     char* res = (char*)e + sizeof(Encrypted);
 
     memset(inmsg, 0, crypto_box_ZEROBYTES);
     strcpy(inmsg + crypto_box_ZEROBYTES, m);
 
-    int r = crypto_box((unsigned char*)res, (unsigned char*)inmsg, mlen, 
-                     n->nonce, 
-                     (unsigned char*)pkey->key, (unsigned char*)skey->key);
+    int r = crypto_box((unsigned char*)res, (unsigned char*)inmsg, mlen,
+                       n->nonce,
+                       (unsigned char*)pkey->key, (unsigned char*)skey->key);
 
     if (r == 0) {
         e->msg = res;
@@ -177,11 +179,11 @@ Decrypted* do_crypto_box_open(Encrypted* cin, Nonce* n, Key* pkey, Key* skey) {
 
     memset(cin->msg, 0, crypto_box_BOXZEROBYTES);
 
-    int r = crypto_box_open((unsigned char*)res, 
-                     (unsigned char*)cin->msg, 
-                     cin->mlen, 
-                     n->nonce, 
-                     (unsigned char*)pkey->key, (unsigned char*)skey->key);
+    int r = crypto_box_open((unsigned char*)res,
+                            (unsigned char*)cin->msg,
+                            cin->mlen,
+                            n->nonce,
+                            (unsigned char*)pkey->key, (unsigned char*)skey->key);
 
     if (r == 0) {
         d->msg = res;
@@ -212,7 +214,7 @@ Encrypted* newBox(int len) {
 
 Encrypted* newSecretBox(int len) {
     Encrypted* e = malloc(sizeof(Encrypted) + len + crypto_secretbox_BOXZEROBYTES);
-    e->msg = (char*)e + sizeof(Encrypted); 
+    e->msg = (char*)e + sizeof(Encrypted);
     e->padding = crypto_secretbox_BOXZEROBYTES;
     e->mlen = len + e->padding;
     return e;
@@ -245,6 +247,3 @@ void* getEncData(Encrypted *enc) {
 void setEncData(Encrypted *enc, void* data) {
     memcpy(enc->msg + enc->padding, data, enc->mlen - enc->padding);
 }
-
-
-

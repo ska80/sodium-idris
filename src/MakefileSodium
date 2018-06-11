@@ -1,8 +1,12 @@
-CFLAGS = `idris --include` 
+
+CFLAGS = `idris --include` `pkg-config --cflags libsodium`
+
 
 sodium_glue.o: sodium_glue.c sodium_glue.h
 
+
 clean: .PHONY
 	rm sodium_glue.o
+
 
 .PHONY:
